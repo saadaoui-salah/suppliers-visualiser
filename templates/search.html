@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Map Visualization</title>
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      #map {
+        height: 50vh;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="my-4 flex items-center justify-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-8 h-8 rounded-md bg-white p-1"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+        />
+      </svg>
+
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search by keyword..."
+        class="w-[400px] px-4 py-1"
+      />
+    </div>
+
+    <div id="map"></div>
+    <div class="flex justify-center items-center space-x-4 mt-4">
+      <button
+        id="prev-btn"
+        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+        disabled
+      >
+        Previous
+      </button>
+      <div id="pagination"></div>
+
+      <button
+        id="next-btn"
+        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Next
+      </button>
+      <p id="count" class="font-bold text-md">results</p>
+    </div>
+    <div
+      id="cards"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
+    >
+      <!-- Cards will be dynamically added here -->
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+      function calculateTotalPages(totalItems, itemsPerPage = 100) {
+        return Math.ceil(totalItems / itemsPerPage);
+      }
+
+      const searchInput = document.getElementById("searchInput");
+      const resultsContainer = document.getElementById("cards");
+      const map = L.map("map").setView([20.0, 0.0], 2); // Default center and zoom level
+      const geocode = async (address) => {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          address
+        )}&format=json`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.results && data.results.length > 0) {
+          const { lat, lng } = data.results[0].geometry;
+          return { lat, lng };
+        } else {
+          console.error("Geocoding failed for address:", address);
+          return null;
+        }
+      };
+      // Add OpenStreetMap tile layer
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+      const loadingCard = `<div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 animate-pulse">
+          <div class="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
+          <div class="h-4 bg-gray-300 rounded w-1/3 mb-6"></div>
+
+          <div class="h-4 bg-gray-300 rounded w-1/4 mb-4"></div>
+
+          <div class="flex items-center mb-3 mt-4">
+            <div class="w-5 h-5 bg-gray-300 rounded-full mr-3"></div>
+            <div class="h-4 bg-gray-300 rounded w-1/2"></div>
+          </div>
+
+          <div class="flex items-center mb-3">
+            <div class="w-5 h-5 bg-gray-300 rounded-full mr-3"></div>
+            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+          </div>
+
+          <div class="flex items-center mb-3">
+            <div class="w-5 h-5 bg-gray-300 rounded-full mr-3"></div>
+            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+          </div>
+
+          <div class="flex items-center mb-3">
+            <div class="w-5 h-5 bg-gray-300 rounded-full mr-3"></div>
+            <div class="h-4 bg-gray-300 rounded w-2/5"></div>
+          </div>
+        </div>
+        `;
+
+      // Function to create a card for each result
+      function createCard(data) {
+        return `
+        <div class="bg-white shadow-md rounded-md p-4">
+          <h2 class="text-xl font-semibold">${data.business_name || "N/A"}</h2>
+          <p><strong>ABN:</strong> ${data.abn || "N/A"}</p>
+          <p><strong>Category:</strong> ${data.category || "N/A"}</p>
+          <p><strong>Description:</strong> ${data.description || "N/A"}</p>
+          <p><strong>Location:</strong> ${data.location || "N/A"}</p>
+        </div>
+      `;
+      }
+
+      // Function to fetch search results
+      async function fetchData(query, currentPage = 1) {
+        resultsContainer.innerHTML = "";
+        const apiUrl = `http://127.0.0.1:8000/api/search/?q=${encodeURIComponent(
+          query
+        )}&page=${currentPage}`;
+
+        try {
+          Array(30)
+            .fill(0)
+            .map((a) => {
+              resultsContainer.innerHTML += loadingCard;
+            });
+
+          const response = await fetch(apiUrl);
+          var data = await response.json();
+          // Clear previous results
+          resultsContainer.innerHTML = "";
+          const createPageButton = (page, label) => {
+            const button = document.createElement("button");
+            button.textContent = label;
+            button.className = "px-2 py-1 mx-1 border rounded";
+            button.disabled = page === currentPage;
+
+            if (page !== currentPage) {
+              button.addEventListener("click", () => {
+                currentPage = page;
+                fetchData(query, currentPage);
+              });
+            }
+
+            return button;
+          };
+          const updatePaginationButtons = (page) => {
+            const paginationContainer = document.getElementById("pagination");
+            paginationContainer.innerHTML = "";
+
+            const startPage = Math.max(1, page - 5);
+            const endPage = Math.min(totalPages, page + 5);
+
+            if (startPage > 1) {
+              const firstPageButton = createPageButton(1, "First");
+              paginationContainer.appendChild(firstPageButton);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+              const pageButton = createPageButton(i, i === page ? `[${i}]` : i);
+              paginationContainer.appendChild(pageButton);
+            }
+
+            if (endPage < totalPages) {
+              const lastPageButton = createPageButton(totalPages, "Last");
+              paginationContainer.appendChild(lastPageButton);
+            }
+          };
+          const totalPages = calculateTotalPages(data.count);
+          if (data.results.length > 0) {
+            data.results.forEach(async (record) => {
+              if (location) {
+                const coordinates = await geocode(record.location);
+
+                if (coordinates) {
+                  const { lat, lng } = coordinates;
+                  L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup(
+                      `<strong>${record.business_name}</strong><br>${record.location}`
+                    );
+                }
+              }
+              resultsContainer.innerHTML += createCard(record);
+            });
+            updatePaginationButtons(currentPage);
+          } else {
+            resultsContainer.innerHTML = `<p class="text-gray-600">No results found.</p>`;
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          resultsContainer.innerHTML = `<p class="text-red-500">Error fetching results. Please try again.</p>`;
+        }
+
+        document.getElementById("prev-btn").disabled = !data.previous;
+        document.getElementById("next-btn").disabled = !data.next;
+        document.getElementById("count").innerHTML = `${data.count} results`;
+        document.getElementById("prev-btn").addEventListener("click", () => {
+          if (currentPage > 1) {
+            currentPage--;
+            fetchData(query, currentPage);
+          }
+        });
+
+        document.getElementById("next-btn").addEventListener("click", () => {
+          if (currentPage < totalPages + 1) {
+            currentPage++;
+            fetchData(query, currentPage);
+          }
+        });
+      }
+
+      // Add event listener for search input
+      searchInput.addEventListener("input", (event) => {
+        const query = event.target.value.trim();
+        if (query) {
+          fetchData(query);
+        } else {
+          resultsContainer.innerHTML = ""; // Clear results if input is empty
+        }
+      });
+    </script>
+  </body>
+</html>

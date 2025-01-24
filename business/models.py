@@ -1,0 +1,28 @@
+from django.db import models
+
+class BusinessInformation(models.Model):
+    abn = models.TextField(null=True, blank=True)
+    availability = models.TextField(null=True, blank=True)
+    awards = models.TextField(null=True, blank=True)
+    business_name = models.TextField(null=True, blank=True)
+    category = models.TextField(null=True, blank=True)
+    contact_information = models.TextField(null=True, blank=True)
+    current_url = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    email = models.TextField(null=True, blank=True)
+    equipment_provided = models.TextField(null=True, blank=True)
+    experience = models.TextField(null=True, blank=True)
+    insurance_coverage = models.TextField(null=True, blank=True)
+    license_number = models.TextField(null=True, blank=True)
+    location = models.TextField(null=True, blank=True)
+    phone_number = models.TextField(null=True, blank=True)
+    primary_services = models.TextField(null=True, blank=True)
+    rating_avg = models.TextField(null=True, blank=True)
+    response_time = models.TextField(null=True, blank=True)
+    reviews = models.TextField(null=True, blank=True)
+    service_area = models.TextField(null=True, blank=True)
+    social_media = models.TextField(null=True, blank=True)
+    specializations = models.TextField(null=True, blank=True)
+    trade_type = models.TextField(null=True, blank=True)
+    website = models.TextField(null=True, blank=True)
+    lat_long = models.TextField(null=True, blank=True)  # Adjust as per your database schema
