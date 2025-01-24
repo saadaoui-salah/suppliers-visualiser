@@ -8,6 +8,8 @@ from rest_framework import status
 from django.db.models import Q
 from .models import BusinessInformation
 from .serializers import BusinessInformationSerializer
+from django.shortcuts import render
+
 
 class BusinessInformationPagination(PageNumberPagination):
     page_size = 100 # Number of records per page
@@ -39,6 +41,7 @@ class BusinessInformationSearchView(ListAPIView):
 
 
 def home(request):
+    print('hey')
     return render(request, 'home.html')
 
 def search(request):

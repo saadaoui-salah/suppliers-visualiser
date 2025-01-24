@@ -53,7 +53,7 @@
       function calculateTotalPages(totalItems, itemsPerPage = 100) {
         return Math.ceil(totalItems / itemsPerPage);
       }
-      const map = L.map("map").setView([20.0, 0.0], 2); // Default center and zoom level
+      const map = L.map("map").setView([-25.2744, 133.7751], 4);
       const geocode = async (address) => {
         const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
           address
@@ -117,7 +117,7 @@
               document.getElementById("cards").innerHTML += loadingCard;
             });
           const response = await fetch(
-            `http://127.0.0.1:8000/api/list/?page=${page}`
+            `https://suppliers-visualiser-production.up.railway.app/api/list/?page=${page}`
           ); // Replace with your API URL
           const data = await response.json();
           const totalPages = calculateTotalPages(data.count);
@@ -188,7 +188,7 @@
             } = record;
 
             // Add marker to the map
-            /* if (location) {
+            if (location) {
               const coordinates = await geocode(location);
               if (coordinates) {
                 const { lat, lng } = coordinates;
@@ -198,7 +198,7 @@
                     `<strong>${business_name}</strong><br>${location}`
                   );
               }
-            } */
+            }
 
             // Create a card
             const card = document.createElement("div");

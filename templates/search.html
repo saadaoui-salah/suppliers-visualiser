@@ -78,7 +78,7 @@
 
       const searchInput = document.getElementById("searchInput");
       const resultsContainer = document.getElementById("cards");
-      const map = L.map("map").setView([20.0, 0.0], 2); // Default center and zoom level
+      const map = L.map("map").setView([-25.2744, 133.7751], 4);
       const geocode = async (address) => {
         const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
           address
@@ -144,7 +144,7 @@
       // Function to fetch search results
       async function fetchData(query, currentPage = 1) {
         resultsContainer.innerHTML = "";
-        const apiUrl = `http://127.0.0.1:8000/api/search/?q=${encodeURIComponent(
+        const apiUrl = `https://suppliers-visualiser-production.up.railway.app/api/search/?q=${encodeURIComponent(
           query
         )}&page=${currentPage}`;
 
