@@ -32,6 +32,7 @@ class BusinessInformationSearchView(ListAPIView):
         if query:
             return BusinessInformation.objects.filter(
                 Q(abn__icontains=query) |
+                Q(trade_type__icontains=query) |
                 Q(business_name__icontains=query) |
                 Q(category__icontains=query) |
                 Q(description__icontains=query) |

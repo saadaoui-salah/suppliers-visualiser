@@ -185,19 +185,16 @@
               phone_number,
               trade_type,
               website,
+              lat_long,
             } = record;
 
             // Add marker to the map
-            if (location) {
-              const coordinates = await geocode(location);
-              if (coordinates) {
-                const { lat, lng } = coordinates;
-                L.marker([lat, lng])
-                  .addTo(map)
-                  .bindPopup(
-                    `<strong>${business_name}</strong><br>${location}`
-                  );
-              }
+
+            if (lat_long) {
+              const [lat, lng] = lat_long.split("|");
+              L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(`<strong>${business_name}</strong><br>${location}`);
             }
 
             // Create a card
