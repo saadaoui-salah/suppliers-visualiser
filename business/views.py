@@ -38,9 +38,8 @@ class BusinessInformationSearchView(ListAPIView):
         return BusinessInformation.objects.none()  # Return an empty queryset if no query provided
 
 
-#def home(request):
-#    return render
-#
-#
-#def search(request):
-#    return render
+def home(request):
+    return render(request, 'home.html')
+
+def search(request):
+    return render(request, 'search.html')

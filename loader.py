@@ -5,7 +5,7 @@ def read_json(path):
         data = json.loads(file.read())
         return data
 
-data = read_json('./localhost.json')
+""" data = read_json('./localhost.json')
 data = data[8]['data']
 BusinessInformation.objects.all().delete()
 
@@ -39,3 +39,4 @@ for i, item in enumerate(data):
     )
     b.save()
     print(f'Adding item {i} out of {len(data)}')
+ """
