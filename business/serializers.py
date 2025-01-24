@@ -1,8 +1,5 @@
 from rest_framework import serializers
 from .models import BusinessInformation
-from geopy.geocoders import Nominatim
-
-geolocator = Nominatim(user_agent="myApp")
 
 class BusinessInformationSerializer(serializers.ModelSerializer):
     class Meta:
